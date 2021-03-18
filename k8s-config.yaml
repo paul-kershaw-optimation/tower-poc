@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tower-app
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: tower-app
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  minReadySeconds: 5
+  template:
+    metadata:
+      labels:
+        app: tower-app
+    spec:
+      nodeSelector:
+        "beta.kubernetes.io/os": linux
+      containers:
+        - name: tower-app
+          image: towersecretspoc.azurecr.io/tower-app:latest
+          ports:
+            - containerPort: 80
+          # resources:
+          #   requests:
+          #     cpu: 250m
+          #   limits:
+          #     cpu: 500m
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: tower-app
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 80
+  selector:
+    app: tower-app
